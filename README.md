@@ -1,6 +1,6 @@
 # Pepperi JsonToJsExtractor
 
-A **desktop Java Swing application** that extracts `JSFormula` logic from complex JSON configuration files(Transaction JSON) and saves them as clean, well-documented `.js` files.
+A **desktop Java Swing application** that extracts `JSFormula` logic from complex Transaction JSON files and saves them as clean, well-documented `.js` files.
 
 Perfect for project managers or developers who need to **review, debug, or migrate calculated field logic**.
 
@@ -13,11 +13,15 @@ Perfect for project managers or developers who need to **review, debug, or migra
     * `Header Fields/` – for `Fields` entries
     * `Line Fields/` – for `LineFields` entries
 * Each `.js` file includes:
-    * Full header comment with `FieldID`, `Label`, `Type`, `Trigger`, `Participating Fields`
-    * Clean `JSFormula` code (as extracted from the JSON)
-* **Real-time progress bar & logs**
-* **Auto-suggested output folder** based on the input JSON filename
+    * Header comment with `FieldID`, `Label`, `Type`, `Trigger`, `Participating Fields`
+    * Extracted `JSFormula` code
+* **Auto-generated output folder name** based on the input file
+* **Progress bar + log panel**
 * **Cross-platform**: Windows, macOS, Linux
+* **Native packaging**:
+    * Windows `.exe` with bundled mini-JRE (via Launch4j)
+    * macOS `.app` image (via jpackage)
+    * Universal standalone JAR
 
 ---
 
@@ -25,20 +29,22 @@ Perfect for project managers or developers who need to **review, debug, or migra
 
 ```
 json-to-js-extractor/
-├── src/
-│   └── main/java/com/extractor/
-│       ├── MainApp.java
-│       ├── ui/
-│       │   ├── MainFrame.java
-│       │   └── ProgressPanel.java
-│       ├── model/FieldData.java
-│       ├── parser/JsonFormulaParser.java
-│       └── util/FileUtils.java
+├── src/main/java/com/extractor/
+│   ├── Main.java
+│   ├── ui/
+│   │   ├── MainFrame.java
+│   │   └── ProgressPanel.java
+│   ├── parser/JsonFormulaParser.java
+│   ├── model/FieldData.java
+│   └── util/FileUtils.java
 ├── dist/
-│   ├── JsonToJsExtractor.jar          ← Run with Java
-│   └── JsonToJsExtractor.exe          ← Windows native launcher
+│   ├── JsonToJsExtractor.jar
+│   ├── win/
+│   │   ├── JsonToJsExtractor.exe
+│   │   └── jre-mini/
+│   └── mac/
+│       └── JsonToJsExtractor.app
 ├── pom.xml
-├── LICENSE
 └── README.md
 ```
 
@@ -46,28 +52,50 @@ json-to-js-extractor/
 
 ## How to Run
 
-### Option 1 — Use pre-built files (recommended for non-developers)
+### Option 1 — Pre-built binaries
 
-1. Open the **`dist/`** folder.
-2. **Windows**: Double-click `JsonToJsExtractor.exe`.
-   **macOS / Linux**: Run the JAR:
+1. Open **dist/**
+2. Choose your platform:
 
-```bash
-java -jar JsonToJsExtractor.jar
+#### Windows
+```
+dist/win/JsonToJsExtractor.exe
+```
+Runs with bundled **mini JRE**, no Java required.
+
+#### macOS
+```
+dist/mac/JsonToJsExtractor.app
 ```
 
-*No installation required. Java 23+ must be installed.*
-
-### Option 2 — Build and run from source (Maven)
-
-```bash
-git clone https://github.com/Helgen97/pepperi_json_to_js_extractor.git
-cd pepperi_json_to_js_extractor
-mvn clean package
+#### Linux or all systems (JAR)
+```
 java -jar dist/JsonToJsExtractor.jar
 ```
 
-The generated native package will be placed in the output directory you specify.
+> Requires **Java 23+** if using the standalone JAR.
+
+---
+
+## Build From Source (Maven)
+
+```
+git clone https://github.com/Helgen97/pepperi_json_to_js_extractor.git
+cd pepperi_json_to_js_extractor
+mvn clean package
+```
+
+After build:
+
+```
+dist/
+├─ JsonToJsExtractor.jar
+├─ win/
+│  ├─ JsonToJsExtractor.exe
+│  └─ jre-mini/
+└─ mac/
+   └─ JsonToJsExtractor.app
+```
 
 ---
 
@@ -108,17 +136,19 @@ The generated native package will be placed in the output directory you specify.
 
 ---
 
-## Example Output (directory)
+## Example Output
+
+Directory structure:
 
 ```
-textMyConfig_extracted/
+MyConfig_extracted/
 ├─ Header Fields/
 │  └─ TSAHeaderCalculationsInit.js
 └─ Line Fields/
    └─ TSALineCalculationChange.js
 ```
 
-### Sample `.js` file content generated for a header field
+Example `.js` file:
 
 ```js
 /**
@@ -129,50 +159,71 @@ textMyConfig_extracted/
  * Trigger: OnLoad
  * Participating Fields: No Participating Fields
  */
-
 function calculate() {
   return 42;
 }
 ```
 
-Notes:
-
-* The original JSON is pretty-printed and included in the comment block for easier reference.
-* The extracted `JSFormula` is written below the header comment unchanged (but can be post-processed for formatting).
-
 ---
 
 ## Requirements
 
-* Java 23 or newer
-* Maven (for building from source)
-* Gson (managed via Maven dependency, e.g. `com.google.code.gson:gson:2.10.1`)
+* Java **23+**
+* Maven 3.8+
+* Gson (included automatically)
 
 ---
 
-## Build & Distribution
+## Build & Packaging (based on pom.xml)
 
-To build a distributable JAR and optionally native packages:
+POM includes:
 
-```bash
-mvn clean package
-# JAR will be available under target/ (name depends on your pom)
+### ✔ Uber JAR via `maven-shade-plugin`
+Creates:
+
+```
+target/JsonToJsExtractor.jar
 ```
 
-After packaging, generated files will be placed into `dist/`. Redistribute `dist/` as desired.
+### ✔ Mini JRE creation via `jlink`
+Generated in:
+
+```
+target/jre-mini
+```
+
+### ✔ Windows EXE with bundled JRE via Launch4j
+Generated in:
+
+```
+dist/win/JsonToJsExtractor.exe
+```
+
+### ✔ macOS `.app` via jpackage
+Generated in:
+
+```
+dist/mac/JsonToJsExtractor.app
+```
 
 ---
 
 ## Troubleshooting
 
-* If the GUI does not start, ensure your machine has a compatible Java runtime (Java 23+). Check with `java -version`.
-* If fields are not detected, validate your JSON with a JSON validator and confirm `Fields` / `LineFields` arrays exist.
-* For encoding issues, ensure files are UTF-8 encoded.
+* **GUI doesn’t start**  
+  Ensure Java 23+ is installed (`java -version`).
+
+* **JSON not parsed**  
+  Check if `Fields` and `LineFields` arrays exist.
+
+* **macOS app blocked**  
+  Run:
+  ```
+  xattr -cr JsonToJsExtractor.app
+  ```
 
 ---
 
 ## License
 
-MIT License — free to use, modify, and distribute.
-
----
+MIT License — free for individual and commercial use.

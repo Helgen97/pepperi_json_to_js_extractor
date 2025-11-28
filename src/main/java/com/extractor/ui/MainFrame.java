@@ -24,7 +24,7 @@ public class MainFrame extends JFrame {
 
     /** Sets up the window layout, fields, buttons, and event handlers */
     private void initUI() {
-        setTitle("Pepperi Transaction JSON → JS files v1.0");
+        setTitle("Pepperi Transaction JSON → JS files v1.1") ;
         setSize(640, 320);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);

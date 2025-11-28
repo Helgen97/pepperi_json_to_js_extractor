@@ -50,6 +50,8 @@ public class JsonFormulaParser {
     private void processSection(JsonObject root, String arrayKey) {
         JsonArray array = root.getAsJsonArray(arrayKey);
 
+        String section = arrayKey.equals("LineFields") ? "Line Fields" : "Header Fields";
+
         // Skip if section doesn't exist
         if (array == null) return;
 
@@ -84,7 +86,7 @@ public class JsonFormulaParser {
             String trigger = cre.getAsJsonObject("CalculatedOn").get("Name").getAsString();
 
             // Store full field JSON for context/debugging
-            fieldDataList.add(new FieldData(fieldId, label, type, trigger, formula, participatingFields));
+            fieldDataList.add(new FieldData(section, fieldId, label, type, trigger, formula, participatingFields));
         }
     }
 
@@ -110,10 +112,9 @@ public class JsonFormulaParser {
 
         for (FieldData fd : fields) {
             // Heuristic to determine if field belongs to Line or Header
-            String section = fd.label().contains("Line") || fd.fieldId().contains("Line")
-                    ? "Line Fields" : "Header Fields";
+            String section = fd.section();
             File dir = sections.get(section);
-            File jsFile = new File(dir, fd.fieldId() + ".js");
+            File jsFile = new File(dir, fd.label() + ".js");
 
             try (BufferedWriter w = new BufferedWriter(new FileWriter(jsFile))) {
                 // Write header comment block with metadata
