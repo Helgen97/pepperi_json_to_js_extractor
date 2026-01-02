@@ -1,8 +1,0 @@
-com/extractor/ui/ProgressPanel.class
-com/extractor/util/FileUtils.class
-com/extractor/model/FieldData.class
-com/extractor/ui/MainFrame.class
-com/extractor/parser/JsonFormulaParser$ProgressCallback.class
-com/extractor/ui/MainFrame$1.class
-com/extractor/Main.class
-com/extractor/parser/JsonFormulaParser.class

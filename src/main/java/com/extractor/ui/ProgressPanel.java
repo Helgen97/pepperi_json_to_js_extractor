@@ -1,7 +1,6 @@
 package com.extractor.ui;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
@@ -16,6 +15,7 @@ public class ProgressPanel extends JPanel {
     public ProgressPanel() {
         setLayout(new BorderLayout(0, 8));
         progressBar = new JProgressBar(0, 100);
+        progressBar.setPreferredSize(new Dimension(10, 26));
         progressBar.setStringPainted(true);
         progressBar.setValue(0);
 

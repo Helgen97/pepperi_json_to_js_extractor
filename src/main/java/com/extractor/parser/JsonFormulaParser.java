@@ -1,6 +1,7 @@
 package com.extractor.parser;
 
 import com.extractor.model.FieldData;
+import com.extractor.ui.ProgressCallback;
 import com.extractor.util.FileUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -93,11 +94,12 @@ public class JsonFormulaParser {
     /**
      * Writes each extracted formula to a separate .js file in organized folders.
      *
-     * @param fields   List of parsed field data
-     * @param rootDir  Root output directory
-     * @param callback Callback to report progress and logs
+     * @param fields      List of parsed field data
+     * @param rootDir     Root output directory
+     * @param addComments Flag to determine if comments should be added to the file
+     * @param callback    Callback to report progress and logs
      */
-    public void writeJsFiles(List<FieldData> fields, File rootDir, ProgressCallback callback) {
+    public void writeJsFiles(List<FieldData> fields, File rootDir, boolean addComments, ProgressCallback callback) {
         FileUtils.ensureDir(rootDir);
 
         // Define output subdirectories
@@ -117,21 +119,24 @@ public class JsonFormulaParser {
             File jsFile = new File(dir, fd.label() + ".js");
 
             try (BufferedWriter w = new BufferedWriter(new FileWriter(jsFile))) {
-                // Write header comment block with metadata
-                w.write("/**\n");
-                w.write(" * SECTION: " + section + "\n");
-                w.write(" * FieldID: " + fd.fieldId() + "\n");
-                w.write(" * Label:   " + fd.label() + "\n");
-                w.write(" * Type:    " + fd.type() + "\n");
-                w.write(" * Trigger: " + fd.trigger() + "\n");
-                w.write(" * Participating Fields: " + (fd.participatingFields().length == 0 ? "No Participating Fields \n" : "\n"));
 
-                for (String participatingField : fd.participatingFields()) {
-                    w.write(" * \t\t" + participatingField + "\n");
+                if (addComments) {
+                    // Write header comment block with metadata
+                    w.write("/**\n");
+                    w.write(" * Section: " + section + "\n");
+                    w.write(" * FieldID: " + fd.fieldId() + "\n");
+                    w.write(" * Label:   " + fd.label() + "\n");
+                    w.write(" * Type:    " + fd.type() + "\n");
+                    w.write(" * Trigger: " + fd.trigger() + "\n");
+                    w.write(" * Participating Fields: " + (fd.participatingFields().length == 0 ? "No Participating Fields \n" : "\n"));
+
+                    for (String participatingField : fd.participatingFields()) {
+                        w.write(" * \t\t" + participatingField + "\n");
+                    }
+
+                    w.write(" */\n");
+                    w.write(" \n");
                 }
-
-                w.write(" */\n");
-                w.write(" \n");
 
                 // Write the actual JS formula
                 w.write(fd.formula());
@@ -139,31 +144,12 @@ public class JsonFormulaParser {
 
                 processed++;
                 int progress = (int) (processed * 100.0 / total);
-                callback.update("Generated: " + section + "/ " + jsFile.getName(), progress);
+                callback.log("Generated: " + section + "/" + jsFile.getName());
+                callback.update("Generated: " + section + "/" + jsFile.getName(), progress);
 
             } catch (IOException e) {
                 callback.log("Failed: " + jsFile.getName() + " → " + e.getMessage());
             }
         }
-    }
-
-    /**
-     * Callback interface for UI progress updates during file generation.
-     */
-    public interface ProgressCallback {
-        /**
-         * Updates progress bar and status message.
-         *
-         * @param message Status text to display
-         * @param percent Progress percentage (0–100)
-         */
-        void update(String message, int percent);
-
-        /**
-         * Logs a message to the console/output area.
-         *
-         * @param message Message to log
-         */
-        void log(String message);
     }
 }
