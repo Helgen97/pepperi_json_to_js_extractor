@@ -27,6 +27,7 @@ public final class UserPreferences {
     private static final String KEY_LAST_INPUT = "lastInputFile";
     private static final String KEY_LAST_OUTPUT = "lastOutputDir";
     private static final String KEY_ADD_COMMENTS = "addComments";
+    private static final String KEY_OPEN_FOLDER = "openFolder";
 
     /**
      * Prevent instantiation.
@@ -80,5 +81,21 @@ public final class UserPreferences {
      */
     public static void setAddCommentsEnabled(boolean value) {
         PREFS.putBoolean(KEY_ADD_COMMENTS, value);
+    }
+
+    /**
+     * @return {@code true} if output folder should be opened after parsing.
+     */
+    public static boolean isOpenFolderEnabled() {
+        return PREFS.getBoolean(KEY_OPEN_FOLDER, true);
+    }
+
+    /**
+     * Enables or disables opening output folder after parsing.
+     *
+     * @param value flag value
+     */
+    public static void setOpenFolderEnabled(boolean value) {
+        PREFS.putBoolean(KEY_OPEN_FOLDER, value);
     }
 }

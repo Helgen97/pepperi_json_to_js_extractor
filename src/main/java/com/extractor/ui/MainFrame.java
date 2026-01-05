@@ -7,37 +7,44 @@ import com.extractor.util.FileUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+
+import static com.extractor.util.UiPlatform.IS_MAC;
 
 /**
  * Main application window.
  * <p>
- * Orchestrates user interaction:
+ * Responsible for orchestrating the complete user flow:
  * <ul>
- *     <li>Select input JSON file</li>
- *     <li>Select output directory</li>
- *     <li>Configure generation options</li>
- *     <li>Run extraction in a background thread</li>
+ *     <li>Selecting input JSON file</li>
+ *     <li>Selecting output directory</li>
+ *     <li>Configuring generation options</li>
+ *     <li>Running extraction in a background thread</li>
+ *     <li>Displaying progress and logs</li>
  * </ul>
+ * <p>
+ * UI layout and spacing are slightly adapted for macOS
+ * to provide a more native look & feel.
  */
 public class MainFrame extends JFrame {
 
     /**
-     * Input JSON path field
+     * Text field holding input JSON file path.
      */
     private final JTextField inputField = new JTextField();
 
     /**
-     * Output directory path field
+     * Text field holding output directory path.
      */
     private final JTextField outputField = new JTextField();
 
     /**
-     * Main action button
+     * Primary action button used to start extraction.
      */
     private final JButton startBtn = new JButton("START");
 
     /**
-     * Progress bar + log output panel
+     * Panel displaying extraction progress and log output.
      */
     private final ProgressPanel progressPanel = new ProgressPanel();
 
@@ -48,6 +55,12 @@ public class MainFrame extends JFrame {
             new JCheckBox("Add comments to generated JS files", true);
 
     /**
+     * Toggle for auto open folder after success parsing
+     */
+    private final JCheckBox openFolderCheckBox =
+            new JCheckBox("Auto-open results folder", true);
+
+    /**
      * Creates and initializes the main window.
      */
     public MainFrame() {
@@ -56,7 +69,10 @@ public class MainFrame extends JFrame {
     }
 
     /**
-     * Initializes Swing components and window layout.
+     * Initializes and lays out all Swing components.
+     * <p>
+     * Applies platform-specific spacing and sizing
+     * to improve native look on macOS.
      */
     private void initUI() {
         setTitle("Pepperi Transaction/Activity JSON → JS files v1.2");
@@ -66,7 +82,9 @@ public class MainFrame extends JFrame {
 
         JPanel top = new JPanel(new GridBagLayout());
         GridBagConstraints g = new GridBagConstraints();
-        g.insets = new Insets(8, 8, 8, 8);
+        g.insets = IS_MAC
+                ? new Insets(6, 8, 6, 8)
+                : new Insets(8, 8, 8, 8);
         g.fill = GridBagConstraints.HORIZONTAL;
 
         // ---- Input file row ----
@@ -98,16 +116,31 @@ public class MainFrame extends JFrame {
         top.add(browseOutput, g);
 
         // ---- Options ----
+        JPanel optionsPanel = new JPanel(
+                new FlowLayout(IS_MAC ? FlowLayout.LEFT : FlowLayout.CENTER, 20, 0)
+        );
+        optionsPanel.setAlignmentY(Component.CENTER_ALIGNMENT);
+        addCommentsCheckBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        optionsPanel.add(addCommentsCheckBox);
+
+        if (Desktop.isDesktopSupported()) {
+            openFolderCheckBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            optionsPanel.add(openFolderCheckBox);
+        }
+
         g.gridx = 0;
         g.gridy = 2;
         g.gridwidth = 3;
-        g.anchor = GridBagConstraints.WEST;
-        addCommentsCheckBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        top.add(addCommentsCheckBox, g);
+        g.anchor = GridBagConstraints.CENTER;
+        top.add(optionsPanel, g);
 
         // ---- Start button ----
         startBtn.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        startBtn.setPreferredSize(new Dimension(120, 52));
+        startBtn.setPreferredSize(
+                IS_MAC
+                        ? new Dimension(110, 44)
+                        : new Dimension(120, 52)
+        );
         startBtn.addActionListener(_ -> startExtraction());
 
         JPanel center = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
@@ -179,7 +212,9 @@ public class MainFrame extends JFrame {
     }
 
     /**
-     * Runs extraction in a background thread to keep UI responsive.
+     * Starts extraction process in a background thread.
+     * <p>
+     * UI updates are safely dispatched to the EDT.
      */
     private void startExtraction() {
         String in = inputField.getText().trim();
@@ -226,6 +261,15 @@ public class MainFrame extends JFrame {
                     progressPanel.log("");
                     progressPanel.log("SUCCESS! Generated " + fields.size() + " files");
                     progressPanel.log("Folder: " + rootDir.getAbsolutePath());
+
+                    if (Desktop.isDesktopSupported() && openFolderCheckBox.isSelected()) {
+                        try {
+                            Desktop.getDesktop().open(new File(rootDir.getAbsolutePath()));
+                        } catch (IOException ex) {
+                            progressPanel.log("FATAL: " + ex.getMessage());
+                        }
+                    }
+
                     startBtn.setEnabled(true);
                 });
 
@@ -242,21 +286,23 @@ public class MainFrame extends JFrame {
     }
 
     /**
-     * Loads persisted user preferences into UI fields
+     * Loads persisted user preferences
+     * and applies them to UI components.
      */
     private void loadPreferences() {
         inputField.setText(UserPreferences.getLastInput());
         outputField.setText(UserPreferences.getLastOutput());
         addCommentsCheckBox.setSelected(UserPreferences.isAddCommentsEnabled());
+        openFolderCheckBox.setSelected(UserPreferences.isOpenFolderEnabled());
     }
 
     /**
-     * Saves current UI state into user preferences
+     * Persists current UI state into user preferences.
      */
     private void savePreferences() {
         UserPreferences.setLastInput(inputField.getText());
         UserPreferences.setLastOutput(outputField.getText());
         UserPreferences.setAddCommentsEnabled(addCommentsCheckBox.isSelected());
+        UserPreferences.setOpenFolderEnabled(openFolderCheckBox.isSelected());
     }
 }
-```
