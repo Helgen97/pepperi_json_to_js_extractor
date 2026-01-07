@@ -179,13 +179,16 @@ public class MainFrame extends JFrame {
             File f = fc.getSelectedFile();
             inputField.setText(f.getAbsolutePath());
 
-            // Suggest output folder: same dir, filename + "_extracted"
-            String name = f.getName().replaceFirst("\\.json$", "");
-            String suggested = f.getParent() + File.separator + name + "_extracted";
-            outputField.setText(suggested);
-
             progressPanel.log("Input: " + f.getName());
-            progressPanel.log("Suggested output: " + new File(suggested).getName());
+
+            if (outputField.getText().isEmpty()) {
+                // Suggest output folder: same dir, filename + "_extracted"
+                String name = f.getName().replaceFirst("\\.json$", "");
+                String suggested = f.getParent() + File.separator + name + "_extracted";
+                outputField.setText(suggested);
+
+                progressPanel.log("Suggested output: " + new File(suggested).getName());
+            }
 
             savePreferences();
         }
