@@ -163,9 +163,9 @@ public class MainFrame extends JFrame {
     private void chooseInput() {
         JFileChooser fc = new JFileChooser();
 
-        String lastOut = UserPreferences.getLastOutput();
-        if (!lastOut.isEmpty()) {
-            File dir = new File(lastOut).getParentFile();
+        String lastIn = UserPreferences.getLastInput();
+        if (!lastIn.isEmpty()) {
+            File dir = new File(lastIn).getParentFile();
             if (dir != null && dir.isDirectory()) {
                 fc.setCurrentDirectory(dir);
             }
