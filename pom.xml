@@ -8,7 +8,7 @@
 
     <groupId>com.extractor</groupId>
     <artifactId>JsonToJsExtractor</artifactId>
-    <version>1.2</version>
+    <version>1.2.1</version>
     <packaging>jar</packaging>
 
     <name>JsonToJsExtractor</name>
@@ -222,12 +222,12 @@
                                     </jre>
 
                                     <versionInfo>
-                                        <fileVersion>1.2.0.0</fileVersion>
+                                        <fileVersion>1.2.1.0</fileVersion>
                                         <txtFileVersion>${project.version}</txtFileVersion>
-                                        <productVersion>1.2.0.0</productVersion>
+                                        <productVersion>1.2.1.0</productVersion>
                                         <txtProductVersion>${project.version}</txtProductVersion>
                                         <fileDescription>JSON to JS Formula Extractor</fileDescription>
-                                        <copyright>© 2025</copyright>
+                                        <copyright>© 2026</copyright>
                                         <productName>JsonToJsExtractor</productName>
                                         <companyName>Pepperi/Dmytro Donchenko</companyName>
                                         <internalName>JsonToJsExtractor</internalName>

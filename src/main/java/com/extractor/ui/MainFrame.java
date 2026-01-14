@@ -4,10 +4,13 @@ import com.extractor.config.UserPreferences;
 import com.extractor.parser.JsonFormulaParser;
 import com.extractor.util.FileUtils;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 import static com.extractor.util.UiPlatform.IS_MAC;
 
@@ -75,10 +78,21 @@ public class MainFrame extends JFrame {
      * to improve native look on macOS.
      */
     private void initUI() {
-        setTitle("Pepperi Transaction/Activity JSON → JS files v1.2");
+        setTitle("Pepperi Transaction/Activity JSON → JS files v1.2.1");
         setSize(640, 480);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+
+        try {
+            Image image = ImageIO.read(
+                    Objects.requireNonNull(
+                            getClass().getResourceAsStream("/app.png")
+                    )
+            );
+            setIconImage(image);
+        } catch (IOException e) {
+            progressPanel.log("Frame icon error: %s".formatted(e.getMessage()));
+        }
 
         JPanel top = new JPanel(new GridBagLayout());
         GridBagConstraints g = new GridBagConstraints();
@@ -171,9 +185,7 @@ public class MainFrame extends JFrame {
             }
         }
 
-        fc.setFileFilter(
-                new javax.swing.filechooser.FileNameExtensionFilter("JSON (*.json)", "json")
-        );
+        fc.setFileFilter(new FileNameExtensionFilter("JSON (*.json)", "json"));
 
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File f = fc.getSelectedFile();
